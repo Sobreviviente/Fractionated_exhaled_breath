@@ -102,6 +102,14 @@ void C50() {
       minimo=sensor_co2_1;
   }
  
+ 
+  if (sensor_co2_1<C50_prom3()){
+    estado_deadspace();
+    
+  }
+  else if(sensor_co2_1>C50_prom3(){
+    estado_biomercador();
+  }
 
 }
 
