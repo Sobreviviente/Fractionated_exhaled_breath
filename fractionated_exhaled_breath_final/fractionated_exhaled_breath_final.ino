@@ -1,5 +1,5 @@
-#define PC  0
-#define C50 1
+#define PCe  0
+#define Ce50 1
 #define SUMA_TIEMPO 150000 // [ms]
 float sensor_p=0;  // valor de sensor presion
 float sensor_co2_1=0;  //valor de sensor co2 primer cable 
@@ -18,16 +18,18 @@ const int valv_blanca_2 = 18;
 const int valv_negra_1 = 19; 
 unsigned long tiempo = 0;
 unsigned long tiempo_t = 0;
-uint8_t useMethod = PC;
+uint8_t useMethod = PCe;
 #define umbral_high 3.1
 #define umbral_low 3.0
-
-float ultimos_3valores[3];
+int estado_aux=0; 
+float ultimos_3valores[3]={};
+int c=0;
 int pos=0;
 float C50_maximo=-8;
 float C50_minimo=8;
-
+float C50_prom3=0;
 bool C50_revisando = true;
+unsigned long tiempo_trigger = 0; 
 
 void setup() {
  Serial.begin(9600);
@@ -43,9 +45,9 @@ void setup() {
  pinMode( valv_negra_1, OUTPUT);
   // put your setup code here, to run once:
   
-  for (int i=0; i<3; i++)
-    ultimos_3valores = -1;
-
+  for (int i=0; i<3; i++){
+      ultimos_3valores[i] = -1;
+  }
 }
 
 void loop() {
@@ -54,28 +56,27 @@ void loop() {
   lectura_sensor();
   controla_bombas();
 
-  if (useMethod == C50)
-    c50();
-  else if (useMethod == PC)
+  if (useMethod == Ce50)
+    C50();
+  else if (useMethod == PCe)
     PC();
-    
-  if (sensor_co2_1>maximo){
-    maximo=sensor_co2_1;
-  }
-  if (sensor_co2_1<minimo){
-    minimo=sensor_co2_1;
-  }  
+     
 }
 
-void C50_prom3() {
+void C50_nuevoValor(float v) {
+  c++;
+  ultimos_3valores[c%3] = v;
+}
+
+void actualizar_promedio() {
   float prom = 0.0;
   for (int i=0; i<3; i++) {
-    if (ultimos_3valores == -1)
+    if (ultimos_3valores[i] == -1)
       break;
     prom += ultimos_3valores[i]/3;
   }
   
-  return prom;
+  C50_prom3 =  prom;
 }
 
 void C50() {
@@ -88,53 +89,49 @@ void C50() {
   }
   else if (sensor_co2_1 <= 0.05 && C50_revisando){
           int promedio;
-          promedio = (maximo+minimo)/2.0;
+          promedio = (C50_maximo+C50_minimo)/2.0;
           ultimos_3valores[pos%3]=promedio;
+          actualizar_promedio();
           pos+=1;   
-          revisando=false;
+          C50_revisando=false;
   }
 
-  if revisando:
-    if (sensor_co2_1>maximo){
-      maximo=sensor_co2_1;
+  if (C50_revisando){
+    if (sensor_co2_1>C50_maximo){
+      C50_maximo=sensor_co2_1;
     }
-    if (sensor_co2_1<minimo){
-      minimo=sensor_co2_1;
+    if (sensor_co2_1<C50_minimo){
+      C50_minimo=sensor_co2_1;
+  }  
   }
- 
- 
-  if (sensor_co2_1<C50_prom3()){
+  
+  if ((sensor_co2_1<C50_prom3) && estado_aux==0){
     estado_deadspace();
+    estado_aux=1;
     
   }
-  else if(sensor_co2_1>C50_prom3(){
-    estado_biomercador();
+  else if((sensor_co2_1>C50_prom3) && estado_aux==1){
+    estado_biomarcador();
+    estado_aux=0;
   }
-
 }
 
 
 
 void PC() {
-  if (estado_curva==0 and sensor_co2_1 > 3.0){    // CURVA SUBIENDO
+  if (estado_curva==0 && sensor_co2_1 > 3.0){    // CURVA SUBIENDO
     estado_curva=1;
   }
-  else if (estado_curva==1 and sensor_co2_1 < 0.5){  //
+  else if (estado_curva==1 && sensor_co2_1 < 0.5){  // 
     estado_curva=2;
     tiempo_trigger = tiempo + SUMA_TIEMPO; 
   }
-  else if (estado_curva=2 and tiempo>tiempo_trigger){
+  else if (estado_curva=2 && tiempo>tiempo_trigger){            // TRIGGER 
     estado_curva=3;
   }
-  else if(estado_curva=3 and sensor_co2_1<0.05){
+  else if(estado_curva=3 && sensor_co2_1<0.05){
     estado_curva=0;
   }
-}
-
-void lectura_sensor(){
-  float cValue = (5.0*analogRead(20))/1023.0;
-  sensor_p = 0.95*sensor_p + 0.05*cValue;
-  //Serial.println(sensor_p,4);
 }
 
 void estado_deadspace(){
@@ -149,6 +146,12 @@ void estado_biomarcador(){
   digitalWrite(valv_negra_2,HIGH);
   digitalWrite(valv_blanca_1,LOW);
   digitalWrite(valv_blanca_2,HIGH);
+}
+
+void lectura_sensor(){
+  float cValue = (5.0*analogRead(20))/1023.0;
+  sensor_p = 0.95*sensor_p + 0.05*cValue;
+  //Serial.println(sensor_p,4);
 }
 
 void controla_bombas(){ 
@@ -236,6 +239,4 @@ void prueba_globos_alternando(){
 
   */
   // put your main code here, to run repeatedly:
-
-
 
