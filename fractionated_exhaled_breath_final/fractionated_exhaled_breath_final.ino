@@ -99,6 +99,16 @@ void C50() {
           pos+=1;   
           revisando=false;
   }
+
+  if revisando:
+    if (sensor_co2_1>maximo){
+      maximo=sensor_co2_1;
+    }
+    if (sensor_co2_1<minimo){
+      minimo=sensor_co2_1;
+  }
+ 
+
 }
 
 
