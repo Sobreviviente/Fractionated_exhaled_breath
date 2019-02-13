@@ -23,7 +23,6 @@ uint8_t useMethod = PC;
 #define umbral_low 3.0
 
 float ultimos_3valores[3];
-int c=0;
 int pos=0;
 float C50_maximo=-8;
 float C50_minimo=8;
@@ -68,11 +67,6 @@ void loop() {
   }  
 }
 
-void C50_nuevoValor(float v) {
-  c++;
-  ultimos_3valores[c%3] = v;
-}
-
 void C50_prom3() {
   float prom = 0.0;
   for (int i=0; i<3; i++) {
@@ -94,8 +88,8 @@ void C50() {
   }
   else if (sensor_co2_1 <= 0.05 && C50_revisando){
           int promedio;
-          promedio = (maximo+minimo)/2;
-          ultimos_3valores[pos]=promedio;
+          promedio = (maximo+minimo)/2.0;
+          ultimos_3valores[pos%3]=promedio;
           pos+=1;   
           revisando=false;
   }
