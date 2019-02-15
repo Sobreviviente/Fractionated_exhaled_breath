@@ -6,11 +6,20 @@ Created on Tue Feb  5 01:05:08 2019
 """
 
 import numpy as np 
+import matplotlib
 import matplotlib.pyplot as plt
+
+matplotlib.rcParams.update(
+    {
+        'text.usetex': False,
+        'font.family': 'stixgeneral',
+        'mathtext.fontset': 'stix',
+    }
+)
 
 my_data = np.genfromtxt('dat_20190122.txt',delimiter = ',')
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(10,4))
 
 print(my_data.shape)
 
@@ -111,7 +120,7 @@ print(lista_tiempo_promedio)
         
 print(time.shape)
 print(data1.shape)
-ax.plot(time,data1,label='Sensor signal1')
+ax.plot(time,data1,linewidth=3,alpha=0.8,label='Sensor ($CO_2$)')
 #ax.plot(time,data2,label='Sensor signal2')
 #ax.plot(time,dd,':',label='diff')
 #ax.plot(time,val,':',label='filtro')
@@ -148,19 +157,33 @@ for n in puntos_del_filtro:
     index_t = np.where (time <= n)
     #print (index_t)
     if (n==puntos_del_filtro[0]):
-        ax.plot(time[index_t[0][-1]],data1[index_t[0][-1]],'bo', label='Estimacion')        
+        ax.plot(time[index_t[0][-1]],data1[index_t[0][-1]],'bo',alpha=.6, label='DM')        
     else:
-        ax.plot(time[index_t[0][-1]],data1[index_t[0][-1]],'bo')
+        ax.plot(time[index_t[0][-1]],data1[index_t[0][-1]],'bo',alpha=.6)
 #for p in ind_c50:
     #print(p)
     #index_p = np.where(time <= p)
     #print(index_p)
-ax.plot(time[ind_c50],data1[ind_c50],'ro',label='C50 Curva')     
+ax.plot(time[ind_c50],data1[ind_c50],'ro',label='C50',alpha=.6)     
 
-ax.plot(time[ind_c50_3],data1[ind_c50_3],'go',label='Promedio C50')        
+ax.plot(time[ind_c50_3],data1[ind_c50_3],'go',label='$C50_3$',alpha=.6)        
+
+ax.set_xlim((time[1],time[-1:]))
+locs, labels = plt.xticks()
+ax.set_xticklabels(locs/1000000)
+
+ax.set_ylabel('Amplitude',fontsize=12)
+ax.set_xlabel('Time [s]',fontsize=12)
+ax.set_title('Detection of Dead Space and Alveolar air separation',fontweight="bold",fontsize=14)
+
+chartBox = ax.get_position()
+ax.set_position([chartBox.x0, chartBox.y0, chartBox.width*0.9, chartBox.height])
+
+ax.legend(loc='upper center', bbox_to_anchor=(1.13, .98), frameon = False)
+
         
-ax.legend(framealpha=0.4)      
+#ax.legend(framealpha=0.7)      
         
-plt.grid()
+plt.grid(linestyle='--',alpha=0.4)
+plt.savefig('fig.pdf',bbox_inches='tight')
 plt.show()
-plt.savefig('figura.pdf')        
