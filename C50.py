@@ -185,5 +185,5 @@ ax.legend(loc='upper center', bbox_to_anchor=(1.13, .98), frameon = False)
 #ax.legend(framealpha=0.7)      
         
 plt.grid(linestyle='--',alpha=0.4)
-plt.savefig('fig.pdf',bbox_inches='tight')
+plt.savefig('detection.pdf',bbox_inches='tight')
 plt.show()
