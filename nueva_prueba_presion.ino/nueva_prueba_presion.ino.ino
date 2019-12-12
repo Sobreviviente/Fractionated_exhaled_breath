@@ -61,7 +61,7 @@ void loop() {
  volFlow = massFlow/rho; // Volumetric flow of air
  volume = volFlow*dt + volume; // Total volume (essentially integrated over time)
  dt = 0.001;
- Serial.println(volume);
+ Serial.println(volume + " L/s \n" );
  delay(1);
 
 
