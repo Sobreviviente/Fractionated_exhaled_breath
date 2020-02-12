@@ -25,8 +25,8 @@ float volume_final=0;
 
 // float vs = 5 ; // Voltage powering pressure sensor
 float rho = 1.225; // Density of air in kg/m3
-float area_1 = 0.0015205308; // Surface area in m2 0.0015205308
-float area_2 = 0.000007068; // Surface area in m2 0.000007068
+float area_1 = 0.00255175863; // Surface area in m2 0.0015205308 // v2: 0.00255175863
+float area_2 = 0.00020106192; // Surface area in m2 0.000007068  // v2: 0.00020106192
 float dt = 0;
 int button = 0; // Value of button
 
@@ -66,6 +66,9 @@ void loop() {
        Serial.println(volume,5);
        delay(1);
         }
+     else {
+      volume = 0;
+     }
   } else{
     Serial.println("Sensor no responde");
     }
