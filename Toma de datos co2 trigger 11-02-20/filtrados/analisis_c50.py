@@ -45,8 +45,6 @@ pastTime = ''
 with open('trigger'+nFile+'.txt', 'r') as csvfile:
     reader = csv.reader(csvfile, delimiter='\t')
     for row in reader:
-        if row[1] == '0':
-            continue
         if row[0] != pastTime:
             pastTime = row[0]
             t = datetime.datetime.strptime(pastTime, "%H:%M:%S")
@@ -54,8 +52,15 @@ with open('trigger'+nFile+'.txt', 'r') as csvfile:
             t = t.total_seconds()
         trigger_time.append(t)
         trigger_data.append(float(row[1]))
-
+        
 separateSeconds(trigger_time)
+
+trigger_data = np.array(trigger_data)
+trigger_time = np.array(trigger_time)
+triggPos = np.argmax(trigger_data>0)
+start = trigger_time[triggPos]
+print triggPos
+print start
 
 # Reading CO2 data
 ####################
@@ -72,30 +77,36 @@ with open('co2'+nFile+'.txt', 'r') as csvfile:
             t = datetime.datetime.strptime(pastTime, "%H:%M:%S")
             t = t - datetime.datetime(1900, 1, 1)
             t = t.total_seconds()
-        if t < trigger_time[0]:
-            continue
         co2_time.append(t)
         co2_data.append(float(row[1]))
 
 separateSeconds(co2_time)
-
-init = co2_time[0]
-co2_time = [i - init for i in co2_time] # set initial time to 0
+co2_time = np.array(co2_time)
+print co2_time[0]
+co2TimePos = np.arange(np.argmax(co2_time>=start))
+startCo2 = np.argmax(co2_time>=start)
+co2_time = co2_time[startCo2:]- co2_time[startCo2]
+co2_data = co2_data[startCo2:]
 
 # Reading Spirometer data
 ####################
 
 spi_all = np.genfromtxt('registro-para-co2'+nFile+'.txt', delimiter='\t')
 
-spi_time = spi_all[:,0]
-spi_flow = spi_all[:,1]
-spi_vol  = spi_all[:,2]
+subsample = 50
+
+spi_time = spi_all[::subsample,0]
+spi_flow = spi_all[::subsample,1]
+spi_vol  = spi_all[::subsample,2]
+
+#spi_flow += -1
+#spi_flow.clip(min=0)
 
 fig, ax = plt.subplots()
 
 ax.plot(spi_time,spi_flow,'.r',label='Flow',alpha=0.5)
 ax.plot(spi_time,spi_vol,'.g',label='Vol',alpha=0.5)
-ax.plot(co2_time,co2_data,'.b',label='CO_2',alpha=0.5)
+ax.plot(co2_time[::subsample],co2_data[::subsample],'.b',label='CO_2',alpha=0.5)
 current_xticks = ax.get_xticklabels()
 newTicks = []
 plt.show(block=False)
