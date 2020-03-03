@@ -38,6 +38,7 @@ def handle_close(evt):
 
 # Reading Trigger data
 ####################
+print("Reading trigger data ... "),
 trigger_time = []
 trigger_data = []
 pastTime = ''
@@ -59,11 +60,12 @@ trigger_data = np.array(trigger_data)
 trigger_time = np.array(trigger_time)
 triggPos = np.argmax(trigger_data>0)
 start = trigger_time[triggPos]
-print triggPos
-print start
+
+print('done')
 
 # Reading CO2 data
 ####################
+print("Reading CO2 data ... "),
 co2_time = []
 co2_data = []
 pastTime = ''
@@ -82,15 +84,16 @@ with open('co2'+nFile+'.txt', 'r') as csvfile:
 
 separateSeconds(co2_time)
 co2_time = np.array(co2_time)
-print co2_time[0]
 co2TimePos = np.arange(np.argmax(co2_time>=start))
 startCo2 = np.argmax(co2_time>=start)
 co2_time = co2_time[startCo2:]- co2_time[startCo2]
 co2_data = co2_data[startCo2:]
 
+print('done')
+
 # Reading Spirometer data
 ####################
-
+print("Reading spirometer data ... "),
 spi_all = np.genfromtxt('registro-para-co2'+nFile+'.txt', delimiter='\t')
 
 subsample = 50
@@ -99,8 +102,14 @@ spi_time = spi_all[::subsample,0]
 spi_flow = spi_all[::subsample,1]
 spi_vol  = spi_all[::subsample,2]
 
-#spi_flow += -1
-#spi_flow.clip(min=0)
+spi_flow *= -1
+spi_flow.clip(min=0) # Only exhalation
+
+print('done')
+
+# Plotting
+####################
+print("Plotting ... "),
 
 fig, ax = plt.subplots()
 
@@ -131,6 +140,8 @@ plt.grid()
 
 plt.savefig('c50-flow'+nFile+'.png')
 plt.savefig('c50-flow'+nFile+'.pdf')
+
+print('done')
 
 while True:
     plt.waitforbuttonpress()
