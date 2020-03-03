@@ -120,7 +120,7 @@ print(lista_tiempo_promedio)
         
 print(time.shape)
 print(data1.shape)
-ax.plot(time,data1,linewidth=3,alpha=0.8,label='Sensor ($CO_2$)')
+ax.plot(time,data1,linewidth=3,alpha=0.4,label='Sensor ($CO_2$)')
 #ax.plot(time,data2,label='Sensor signal2')
 #ax.plot(time,dd,':',label='diff')
 #ax.plot(time,val,':',label='filtro')
@@ -130,7 +130,11 @@ index = np.where (puntos_estado != 0)
 #ax.plot(time[index],puntos_estado[index],'o',label = 'Ref estados')
 
 ind_c50 = []
-ind_c50_3 = []
+ind_c50_1 = {'steps':1,'data':[]}
+ind_c50_3 = {'steps':3,'data':[]}
+ind_c50_5 = {'steps':5,'data':[]}
+ind_c50_7 = {'steps':7,'data':[]}
+ind_c50_all = (ind_c50_1,ind_c50_3,ind_c50_5,ind_c50_7)
 
 ##Busqueda tiempo punto C50    
 for i in range(1,data2.size):
@@ -144,31 +148,39 @@ for i in range(1,data2.size):
     
     if (len(ind_c50) <= step and value>=lista_promedio[step]):
         ind_c50.append(i)
-    if (step > 3 and len(ind_c50_3) <= step and value>=np.mean(lista_promedio[step-3:step])):
-        ind_c50_3.append(i)
+    for ind in ind_c50_all:
+        if (step > ind['steps'] and len(ind['data']) <= step and value>=np.mean(lista_promedio[step-ind['steps']:step])):
+            ind['data'].append(i)
+    # if (step > 3 and len(ind_c50_3) <= step and value>=np.mean(lista_promedio[step-3:step])):
+        # ind_c50_3.append(i)
     if (time[i]==lista_tiempo_promedio[step]): 
        step+=1
        print (step) 
        if step>=len(lista_tiempo_promedio):
            break
        
-for n in puntos_del_filtro:
-    #print(n)
-    index_t = np.where (time <= n)
-    #print (index_t)
-    if (n==puntos_del_filtro[0]):
-        ax.plot(time[index_t[0][-1]],data1[index_t[0][-1]],'bo',alpha=.6, label='DM')        
-    else:
-        ax.plot(time[index_t[0][-1]],data1[index_t[0][-1]],'bo',alpha=.6)
+# for n in puntos_del_filtro:
+#     #print(n)
+#     index_t = np.where (time <= n)
+#     #print (index_t)
+#     if (n==puntos_del_filtro[0]):
+#         ax.plot(time[index_t[0][-1]],data1[index_t[0][-1]],'bo',alpha=.6, label='DM')        
+#     else:
+#         ax.plot(time[index_t[0][-1]],data1[index_t[0][-1]],'bo',alpha=.6)
 #for p in ind_c50:
     #print(p)
     #index_p = np.where(time <= p)
     #print(index_p)
-ax.plot(time[ind_c50],data1[ind_c50],'ro',label='C50',alpha=.6)     
+ax.plot(time[ind_c50],data1[ind_c50],'ro',label='C50',alpha=.2,markersize=15)    
+ax.plot(time[ind_c50],data1[ind_c50],'rx',label='C50',alpha=.6,markersize=15)     
 
-ax.plot(time[ind_c50_3],data1[ind_c50_3],'go',label='$C50_3$',alpha=.6)        
+for ind in ind_c50_all:
+    ax.plot(time[ind['data']],data1[ind['data']],'3',label='$C50_'+str(ind['steps'])+'$',alpha=.9,markersize=60)            
+# ax.plot(time[ind_c50_3],data1[ind_c50_3],'go',label='$C50_3$',alpha=.6)        
 
-ax.set_xlim((time[1],time[-1:]))
+tmin = np.where(time >= 42000000)[0][0]
+tmax = np.where(time >= 95000000)[0][0]
+ax.set_xlim((time[tmin],time[tmax]))
 locs, labels = plt.xticks()
 ax.set_xticklabels(locs/1000000)
 
