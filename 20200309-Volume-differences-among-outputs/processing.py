@@ -97,9 +97,11 @@ print "dead-space count:",len(starts_v)
 def show_fullsize(filename):
     mng = plt.get_current_fig_manager()
     mng.resize(*mng.window.maxsize())
-    plt.show()
     if filename:
+        figure = plt.gcf() # get current figure
+        figure.set_size_inches(14, 7)
         plt.savefig(filename+'.pdf')
+    plt.show()
 
 
 plt.subplot(221)
@@ -108,8 +110,8 @@ plt.plot(time,fdata,alpha=0.3,linewidth=3)
 for p in starts_f:
     plt.plot(time[p],0,'ro',linewidth=2.5,alpha=0.6)
 plt.plot(time,fdata_proc,'b',label='alveolar')
-plt.ylabel('Exhaled flow')
-plt.xlabel('Time [s]')
+plt.ylabel('Alveolar\nexhaled flow')
+#plt.xlabel('Time [s]')
 plt.legend()
 plt.subplot(223)
 plt.plot(time,vdata,alpha=0.3,linewidth=3)
@@ -117,7 +119,8 @@ for p in starts_v:
     plt.plot(time[p],0,'ro',linewidth=2.5,alpha=0.6)
 plt.plot(time,vdata_proc,'orange',label='dead-space')
 plt.xlabel('Time [s]')
-plt.ylabel('Exhaled flow')
+plt.ylabel('Dead-space\nexhaled flow')
+plt.suptitle('Exhaled flow')
 plt.legend()
 
 plt.subplot(222)
@@ -125,7 +128,7 @@ plt.title('Smaller window')
 plt.plot(time[:starts_f[10]],fdata_proc[:starts_f[10]],'b')
 for p in starts_f[:10]:
     plt.plot(time[p],0,'ro',linewidth=2.5,alpha=0.6)
-plt.xlabel('Time [s]')
+#plt.xlabel('Time [s]')
 plt.subplot(224)
 plt.plot(time[:starts_v[10]],vdata_proc[:starts_v[10]],'orange')
 for p in starts_v[:10]:
@@ -147,7 +150,7 @@ plt.subplot(211)
 plt.plot(volumes_f,'*',label='alveolar')
 plt.plot(volumes_v,'*',label='dead-space')
 plt.ylabel('Volume per exhalation')
-plt.xlabel('Volume [L]')
+plt.xlabel('Exhalation')
 plt.legend()
 plt.subplot(212)
 plt.hist(volumes_f,bins,label='alveolar',alpha=0.4)
